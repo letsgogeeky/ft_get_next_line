@@ -6,7 +6,7 @@
 /*   By: ramoussa <ramoussa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/01 20:08:04 by ramoussa          #+#    #+#             */
-/*   Updated: 2023/04/09 15:32:12 by ramoussa         ###   ########.fr       */
+/*   Updated: 2023/04/10 17:23:31 by ramoussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,15 +17,6 @@
 # define BUFFER_SIZE 10000000
 #endif
 
-static void	free_str(char *str)
-{
-	if (str)
-	{
-		free(str);
-		str = NULL;
-	}
-}
-
 static char	*adjust_buffer(char *str)
 {
 	int		buffer_idx;
@@ -34,20 +25,20 @@ static char	*adjust_buffer(char *str)
 
 	buffer_idx = 0;
 	if (!str)
-		return (free_str(str), NULL);
+		return (free(str), NULL);
 	while (str[buffer_idx] && str[buffer_idx] != '\n')
 		buffer_idx++;
 	if (!str[buffer_idx])
-		return (free_str(str), NULL);
+		return (free(str), NULL);
 	new_buffer = ft_calloc(ft_strlen(str) - buffer_idx + 1, sizeof(char));
 	if (new_buffer == NULL)
-		return (free_str(str), free_str(new_buffer), NULL);
+		return (free(str), free(new_buffer), NULL);
 	buffer_idx++;
 	new_idx = 0;
 	while (str[buffer_idx])
 		new_buffer[new_idx++] = str[buffer_idx++];
 	new_buffer[new_idx + 1] = 0;
-	return (free_str(str), new_buffer);
+	return (free(str), new_buffer);
 }
 
 static char	*get_line(char *str)
@@ -84,25 +75,23 @@ static char	*ft_read_from_fd(int fd, char *str)
 	int		read_size;
 	char	*tmp;
 
-	tmp = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
+	tmp = ft_calloc(BUFFER_SIZE, sizeof(char));
 	if (!tmp)
-		return (free_str(str), NULL);
+		return (free(str), NULL);
 	read_size = read(fd, tmp, BUFFER_SIZE);
 	if (read_size == -1)
-		return (free_str(tmp), free_str(str), NULL);
+		return (free(tmp), free(str), NULL);
 	while (read_size > 0)
 	{
-		tmp[read_size] = '\0';
-		if (!str)
-			str = ft_calloc(1, sizeof(char));
-		str = ft_strjoin(str, tmp);
-		if (ft_strchr(str, '\n'))
+		str = ft_strjoin(str, tmp, read_size);
+		if (str && ft_strchr(str, '\n'))
 			break ;
 		read_size = read(fd, tmp, BUFFER_SIZE);
 		if (read_size == -1)
-			return (free_str(tmp), free_str(str), NULL);
+			return (free(tmp), tmp = NULL, free(str), NULL);
 	}
-	free_str(tmp);
+	free(tmp);
+	tmp = NULL;
 	return (str);
 }
 
@@ -111,8 +100,8 @@ char	*get_next_line(int fd)
 	static char	*buffer;
 	char		*line;
 
-	if (fd < 0 || read(fd, 0, 0) < 0 || BUFFER_SIZE <= 0)
-		return (free_str(buffer), buffer = NULL, NULL);
+	if (fd < 0 || BUFFER_SIZE <= 0)
+		return (free(buffer), buffer = NULL, NULL);
 	buffer = ft_read_from_fd(fd, buffer);
 	if (!buffer)
 		return (NULL);

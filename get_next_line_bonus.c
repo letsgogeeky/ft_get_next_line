@@ -6,7 +6,7 @@
 /*   By: ramoussa <ramoussa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/07 18:28:12 by ramoussa          #+#    #+#             */
-/*   Updated: 2023/04/09 15:47:13 by ramoussa         ###   ########.fr       */
+/*   Updated: 2023/04/10 17:25:24 by ramoussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,15 +17,6 @@
 # define BUFFER_SIZE 10000000
 #endif
 
-static void	free_str(char *str)
-{
-	if (str)
-	{
-		free(str);
-		str = NULL;
-	}
-}
-
 static char	*adjust_buffer(char *str)
 {
 	int		buffer_idx;
@@ -34,11 +25,11 @@ static char	*adjust_buffer(char *str)
 
 	buffer_idx = 0;
 	if (!str)
-		return (free_str(str), NULL);
+		return (free(str), NULL);
 	while (str[buffer_idx] && str[buffer_idx] != '\n')
 		buffer_idx++;
 	if (!str[buffer_idx])
-		return (free_str(str), NULL);
+		return (free(str), NULL);
 	new_buffer = ft_calloc(ft_strlen(str) - buffer_idx + 1, sizeof(char));
 	if (new_buffer == NULL)
 		return (NULL);
@@ -47,7 +38,7 @@ static char	*adjust_buffer(char *str)
 	while (str[buffer_idx])
 		new_buffer[new_idx++] = str[buffer_idx++];
 	new_buffer[new_idx + 1] = 0;
-	return (free_str(str), new_buffer);
+	return (free(str), new_buffer);
 }
 
 static char	*get_line(char *str)
@@ -99,12 +90,12 @@ static char	*ft_read_from_fd(int fd, char *str)
 		read_size = read(fd, tmp, BUFFER_SIZE);
 		if (read_size == -1)
 		{
-			free_str(tmp);
-			free_str(str);
+			free(tmp);
+			free(str);
 			return (NULL);
 		}
 	}
-	free_str(tmp);
+	free(tmp);
 	return (str);
 }
 

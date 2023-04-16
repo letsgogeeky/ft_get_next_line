@@ -6,7 +6,7 @@
 /*   By: ramoussa <ramoussa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/01 20:08:06 by ramoussa          #+#    #+#             */
-/*   Updated: 2023/04/09 15:52:48 by ramoussa         ###   ########.fr       */
+/*   Updated: 2023/04/10 17:25:59 by ramoussa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,35 +28,6 @@ int	ft_strlen(char *c)
 	return (size);
 }
 
-char	*ft_strjoin(char *s1, char *s2)
-{
-	unsigned int	len;
-	char			*str;
-	unsigned int	str_idx;
-
-	len = ft_strlen(s1) + ft_strlen(s2);
-	str_idx = 0;
-	if (!s1 || !s2)
-		return (NULL);
-	str = (char *)malloc(len + 1);
-	if (!str)
-		return (NULL);
-	while (s1[str_idx] != '\0')
-	{
-		str[str_idx] = s1[str_idx];
-		str_idx++;
-	}
-	while (*s2 != '\0')
-	{
-		str[str_idx] = *s2;
-		s2++;
-		str_idx++;
-	}
-	str[str_idx] = '\0';
-	free(s1);
-	return (str);
-}
-
 void	ft_bzero(void *s, int len)
 {
 	int		idx;
@@ -71,14 +42,16 @@ void	ft_bzero(void *s, int len)
 	}
 }
 
-char	*ft_calloc(unsigned int count, unsigned int size)
+char	*ft_calloc(size_t count, size_t size)
 {
 	char	*str;
 
-	str = malloc(count * size);
+	if (count * size / count != size)
+		return (NULL);
+	str = (char *)malloc(count * size);
 	if (!str)
 	{
-		return (NULL);
+		return (free(str), str = NULL, NULL);
 	}
 	ft_bzero(str, count * size);
 	return (str);
@@ -102,4 +75,33 @@ char	*ft_strchr(const char *s, int c)
 		return ((char *)s);
 	}
 	return (NULL);
+}
+
+char	*ft_strjoin(char *s1, char *s2, int s2_len)
+{
+	unsigned int	len;
+	char			*str;
+	unsigned int	str_idx;
+	int				s2_idx;
+
+	len = ft_strlen(s1) + s2_len;
+	str_idx = 0;
+	s2_idx = 0;
+	str = (char *)ft_calloc(len + 1, sizeof(char));
+	if (!str)
+		return (NULL);
+	while (s1 && s1[str_idx] != '\0')
+	{
+		str[str_idx] = s1[str_idx];
+		str_idx++;
+	}
+	while (s2_idx < s2_len)
+	{
+		str[str_idx] = *s2;
+		s2++;
+		str_idx++;
+		s2_idx++;
+	}
+	str[str_idx] = '\0';
+	return (free(s1), s1 = NULL, str);
 }
